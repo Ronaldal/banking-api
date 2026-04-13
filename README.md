@@ -160,11 +160,12 @@ src/
     dto/
       create-account.dto.ts
       transaction.dto.ts
-      get-statement-filter.dto.ts
   transactions/
-    transactions.controller.ts  # Statement endpoint
+    transactions.controller.ts  # Statement endpoint (POST /accounts/:id/statement)
     transactions.service.ts     # getStatement logic
     transactions.module.ts
+    dto/
+      get-statement-filter.dto.ts
   persons/
     persons.service.ts        # Seeds default person on startup (onModuleInit)
     persons.module.ts
