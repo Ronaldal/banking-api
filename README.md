@@ -47,7 +47,7 @@ Open `http://localhost:3050/api` in your browser.
 
 ## Default Seed Data
 
-When the application starts, a default person is automatically seeded with onModuleInit in persons.service.ts (if the table is empty):
+When the application starts, a default person is automatically seeded with `onModuleInit` in `persons.service.ts` (if the table is empty):
 
 | Field     | Value       |
 |-----------|-------------|
@@ -128,22 +128,61 @@ npm run test:e2e
 
 # Run tests in watch mode
 npm run test:watch
+```
+
+## Architecture
 
 ```
+Request
+  |
+  ├── AccountsController ──> AccountsService ──> DB
+  |     (create, deposit,      (processTransaction,
+  |      withdraw, balance,     createAccount,
+  |      block)                 getBalance, blockAccount)
+  |
+  └── TransactionsController ──> TransactionsService ──> DB
+        (statement)                (getStatement)
+```
+
+- **AccountsController** handles account operations, delegates to **AccountsService**
+- **AccountsService** owns `processTransaction` (atomic deposit/withdraw with pessimistic locking)
+- **TransactionsController** handles statement queries, delegates to **TransactionsService**
+- **TransactionsService** owns `getStatement` (transaction fetching with date filters)
 
 ## Project Structure
 
 ```
 src/
-  accounts/          # Account controller, service, DTOs, module
-  transactions/      # Transaction service, DTOs, module
-  persons/           # Person service, module (seeds default person on startup)
-  entities/          # TypeORM entities (Person, Account, Transaction)
-  interfaces/        # Response types
-  enums/             # AccountType, TransactionType
-  consts/            # Route constants
-  config/            # Database configuration
-  seed.ts            # Seed script for sample data
+  accounts/
+    accounts.controller.ts    # Account endpoints (create, deposit, withdraw, balance, block)
+    accounts.service.ts       # Account logic + processTransaction
+    accounts.module.ts
+    dto/
+      create-account.dto.ts
+      transaction.dto.ts
+      get-statement-filter.dto.ts
+  transactions/
+    transactions.controller.ts  # Statement endpoint
+    transactions.service.ts     # getStatement logic
+    transactions.module.ts
+  persons/
+    persons.service.ts        # Seeds default person on startup (onModuleInit)
+    persons.module.ts
+  entities/
+    person.entity.ts          # Person (pessoas table)
+    account.entity.ts         # Account
+    transaction.entity.ts     # Transaction
+  interfaces/
+    account.interfaces.ts     # AccountResponse, BalanceResponse, BlockResponse
+    transaction.interfaces.ts # TransactionResponse, StatementItem
+  enums/
+    account-type.enum.ts      # CHECKING, SAVINGS, INVESTMENT
+    transaction-type.enum.ts  # DEPOSIT, WITHDRAWAL
+  consts/
+    routes.consts.ts          # Route path constants
+  config/
+    database.config.ts        # Shared database configuration
+  seed.ts                     # Seed script for sample data
 test/
-  accounts.e2e-spec.ts  # End-to-end tests
+  accounts.e2e-spec.ts       # End-to-end tests
 ```

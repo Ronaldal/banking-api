@@ -4,10 +4,9 @@ import { Account } from '../entities/account.entity';
 import { Person } from '../entities/person.entity';
 import { AccountsService } from './accounts.service';
 import { AccountsController } from './accounts.controller';
-import { TransactionsModule } from '../transactions/transactions.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Account, Person]), TransactionsModule],
+  imports: [TypeOrmModule.forFeature([Account, Person])],
   controllers: [AccountsController],
   providers: [AccountsService],
   exports: [AccountsService],

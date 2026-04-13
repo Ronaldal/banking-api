@@ -33,7 +33,11 @@ describe('PersonsService', () => {
 
   describe('onModuleInit', () => {
     it('should seed a default person when table is empty', async () => {
-      const defaultPerson = { personId: 1, name: 'John Doe', document: '123456789' };
+      const defaultPerson = {
+        personId: 1,
+        name: 'John Doe',
+        document: '123456789',
+      };
 
       mockPersonRepository.count.mockResolvedValue(0);
       mockPersonRepository.create.mockReturnValue(defaultPerson);

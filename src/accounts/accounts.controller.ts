@@ -10,29 +10,21 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { AccountsService } from './accounts.service';
 import { Account } from '../entities/account.entity';
-import { TransactionsService } from '../transactions/transactions.service';
 import { CreateAccountDto } from './dto/create-account.dto';
-import { TransactionDto } from '../transactions/dto/transaction.dto';
-import { GetStatementFilterDto } from '../transactions/dto/get-statement-filter.dto';
+import { TransactionDto } from './dto/transaction.dto';
 import { ROUTES } from '../consts/routes.consts';
 import {
   AccountResponse,
   BalanceResponse,
   BlockResponse,
 } from '../interfaces/account.interfaces';
-import {
-  TransactionResponse,
-  StatementItem,
-} from '../interfaces/transaction.interfaces';
+import { TransactionResponse } from '../interfaces/transaction.interfaces';
 import { TransactionType } from '../enums/transaction-type.enum';
 
 @ApiTags('Accounts')
 @Controller(ROUTES.ACCOUNTS)
 export class AccountsController {
-  constructor(
-    private readonly accountsService: AccountsService,
-    private readonly transactionsService: TransactionsService,
-  ) {}
+  constructor(private readonly accountsService: AccountsService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new banking account' })
@@ -67,7 +59,7 @@ export class AccountsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: TransactionDto,
   ): Promise<TransactionResponse> {
-    return this.transactionsService.processTransaction(
+    return this.accountsService.processTransaction(
       id,
       dto,
       TransactionType.DEPOSIT,
@@ -95,7 +87,7 @@ export class AccountsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: TransactionDto,
   ): Promise<TransactionResponse> {
-    return this.transactionsService.processTransaction(
+    return this.accountsService.processTransaction(
       id,
       dto,
       TransactionType.WITHDRAWAL,
@@ -118,7 +110,7 @@ export class AccountsController {
   async getBalance(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<BalanceResponse> {
-    return await this.accountsService.getBalance(id);
+    return this.accountsService.getBalance(id);
   }
 
   @Patch(':id/block')
@@ -134,26 +126,6 @@ export class AccountsController {
   async blockAccount(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<BlockResponse> {
-    return await this.accountsService.blockAccount(id);
-  }
-
-  @Post(':id/statement')
-  @ApiOperation({ summary: 'Get account transactions filtered by date period' })
-  @ApiParam({
-    name: 'id',
-    description: 'The ID of the account',
-    type: 'number',
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Returns filtered transactions.',
-    type: [StatementItem],
-  })
-  @ApiResponse({ status: 404, description: 'Account not found.' })
-  async getStatement(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() filter: GetStatementFilterDto,
-  ): Promise<StatementItem[]> {
-    return this.transactionsService.getStatement(id, filter);
+    return this.accountsService.blockAccount(id);
   }
 }
