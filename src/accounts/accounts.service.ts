@@ -23,11 +23,18 @@ export class AccountsService {
   ) {}
 
   async createAccount(createAccountDto: CreateAccountDto): Promise<Account> {
-    const { personId, dailyWithdrawalLimit, accountType } = createAccountDto;
+    const { personId, document, dailyWithdrawalLimit, accountType } =
+      createAccountDto;
 
     const person = await this.personRepository.findOne({ where: { personId } });
     if (!person) {
       throw new NotFoundException(`Person with ID ${personId} not found`);
+    }
+
+    if (person.document !== document) {
+      throw new BadRequestException(
+        'Document does not match the person record',
+      );
     }
 
     const newAccount = this.accountRepository.create({

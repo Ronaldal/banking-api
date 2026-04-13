@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsEnum } from 'class-validator';
+import { IsNumber, IsEnum, IsString, IsNotEmpty } from 'class-validator';
 import { AccountType } from '../../enums/account-type.enum';
 
 export class CreateAccountDto {
@@ -9,6 +9,14 @@ export class CreateAccountDto {
   })
   @IsNumber()
   personId!: number;
+
+  @ApiProperty({
+    description: 'The document of the person (must match the person record)',
+    example: '123456789',
+  })
+  @IsString()
+  @IsNotEmpty()
+  document!: string;
 
   @ApiProperty({ description: 'Daily limit for withdrawals', example: 1000.0 })
   @IsNumber()

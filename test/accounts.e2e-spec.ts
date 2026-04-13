@@ -68,6 +68,7 @@ describe('Accounts (e2e)', () => {
         .post('/accounts')
         .send({
           personId,
+          document: '123456789',
           dailyWithdrawalLimit: 1000,
           accountType: AccountType.CHECKING,
         })
@@ -89,11 +90,24 @@ describe('Accounts (e2e)', () => {
       expect(dbAccount!.activeFlag).toBe(true);
     });
 
+    it('should return 400 for wrong document', async () => {
+      await request(app.getHttpServer())
+        .post('/accounts')
+        .send({
+          personId,
+          document: 'wrong-document',
+          dailyWithdrawalLimit: 1000,
+          accountType: AccountType.CHECKING,
+        })
+        .expect(400);
+    });
+
     it('should return 404 for non-existent person', async () => {
       await request(app.getHttpServer())
         .post('/accounts')
         .send({
           personId: 9999,
+          document: '123456789',
           dailyWithdrawalLimit: 1000,
           accountType: AccountType.CHECKING,
         })
@@ -215,11 +229,12 @@ describe('Accounts (e2e)', () => {
     });
   });
 
-  describe('GET /accounts/:id/statement', () => {
+  describe('POST /accounts/:id/statement', () => {
     it('should return all transactions', async () => {
       const res = await request(app.getHttpServer())
-        .get(`/accounts/${accountId}/statement`)
-        .expect(200);
+        .post(`/accounts/${accountId}/statement`)
+        .send({})
+        .expect(201);
 
       const body = res.body as StatementItem[];
       expect(body.length).toBe(2); // 1 deposit + 1 withdrawal
@@ -228,10 +243,9 @@ describe('Accounts (e2e)', () => {
     it('should filter transactions by date range', async () => {
       const today = new Date().toISOString().split('T')[0];
       const res = await request(app.getHttpServer())
-        .get(
-          `/accounts/${accountId}/statement?startDate=${today}&endDate=${today}`,
-        )
-        .expect(200);
+        .post(`/accounts/${accountId}/statement`)
+        .send({ startDate: today, endDate: today })
+        .expect(201);
 
       const body = res.body as StatementItem[];
       expect(body.length).toBe(2);
@@ -239,12 +253,9 @@ describe('Accounts (e2e)', () => {
 
     it('should return empty for future date range', async () => {
       const res = await request(app.getHttpServer())
-        .get(
-          '/accounts/' +
-            accountId +
-            '/statement?startDate=2099-01-01&endDate=2099-12-31',
-        )
-        .expect(200);
+        .post(`/accounts/${accountId}/statement`)
+        .send({ startDate: '2099-01-01', endDate: '2099-12-31' })
+        .expect(201);
 
       const body = res.body as StatementItem[];
       expect(body.length).toBe(0);
@@ -252,7 +263,8 @@ describe('Accounts (e2e)', () => {
 
     it('should return 404 for non-existent account', async () => {
       await request(app.getHttpServer())
-        .get('/accounts/9999/statement')
+        .post('/accounts/9999/statement')
+        .send({})
         .expect(404);
     });
   });

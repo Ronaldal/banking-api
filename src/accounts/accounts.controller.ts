@@ -4,7 +4,6 @@ import {
   Body,
   Get,
   Param,
-  Query,
   ParseIntPipe,
   Patch,
 } from '@nestjs/common';
@@ -138,7 +137,7 @@ export class AccountsController {
     return await this.accountsService.blockAccount(id);
   }
 
-  @Get(':id/statement')
+  @Post(':id/statement')
   @ApiOperation({ summary: 'Get account transactions filtered by date period' })
   @ApiParam({
     name: 'id',
@@ -146,14 +145,14 @@ export class AccountsController {
     type: 'number',
   })
   @ApiResponse({
-    status: 200,
+    status: 201,
     description: 'Returns filtered transactions.',
     type: [StatementItem],
   })
   @ApiResponse({ status: 404, description: 'Account not found.' })
   async getStatement(
     @Param('id', ParseIntPipe) id: number,
-    @Query() filter: GetStatementFilterDto,
+    @Body() filter: GetStatementFilterDto,
   ): Promise<StatementItem[]> {
     return this.transactionsService.getStatement(id, filter);
   }
