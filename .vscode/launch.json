@@ -4,6 +4,15 @@
     {
       "type": "node",
       "request": "launch",
+      "name": "Debug Server",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start:debug"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "type": "node",
+      "request": "launch",
       "name": "Debug E2E Test",
       "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
       "args": ["--config", "${workspaceRoot}/test/jest-e2e.json", "${file}"],

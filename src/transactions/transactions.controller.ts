@@ -6,7 +6,7 @@ import { ROUTES } from '../consts/routes.consts';
 import { StatementItem } from '../interfaces/transaction.interfaces';
 
 @ApiTags('Transactions')
-@Controller(ROUTES.ACCOUNTS)
+@Controller(ROUTES.TRANSACTIONS)
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 

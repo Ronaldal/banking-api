@@ -99,7 +99,7 @@ To connect to the database from pgAdmin:
 | POST    | `/accounts/:id/withdraw`          | Withdraw money                     |
 | GET     | `/accounts/:id/balance`           | Get current balance                |
 | PATCH   | `/accounts/:id/block`             | Block an account                   |
-| POST    | `/accounts/:id/statement`         | Get transactions (optional date filter in body) |
+| POST    | `/transactions/:id/statement`     | Get transactions (optional date filter in body) |
 
 ## Environment Variables
 
@@ -161,7 +161,7 @@ src/
       create-account.dto.ts
       transaction.dto.ts
   transactions/
-    transactions.controller.ts  # Statement endpoint (POST /accounts/:id/statement)
+    transactions.controller.ts  # Statement endpoint (POST /transactions/:id/statement)
     transactions.service.ts     # getStatement logic
     transactions.module.ts
     dto/

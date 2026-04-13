@@ -229,10 +229,10 @@ describe('Accounts (e2e)', () => {
     });
   });
 
-  describe('POST /accounts/:id/statement', () => {
+  describe('POST /transactions/:id/statement', () => {
     it('should return all transactions', async () => {
       const res = await request(app.getHttpServer())
-        .post(`/accounts/${accountId}/statement`)
+        .post(`/transactions/${accountId}/statement`)
         .send({})
         .expect(201);
 
@@ -243,7 +243,7 @@ describe('Accounts (e2e)', () => {
     it('should filter transactions by date range', async () => {
       const today = new Date().toISOString().split('T')[0];
       const res = await request(app.getHttpServer())
-        .post(`/accounts/${accountId}/statement`)
+        .post(`/transactions/${accountId}/statement`)
         .send({ startDate: today, endDate: today })
         .expect(201);
 
@@ -253,7 +253,7 @@ describe('Accounts (e2e)', () => {
 
     it('should return empty for future date range', async () => {
       const res = await request(app.getHttpServer())
-        .post(`/accounts/${accountId}/statement`)
+        .post(`/transactions/${accountId}/statement`)
         .send({ startDate: '2099-01-01', endDate: '2099-12-31' })
         .expect(201);
 
@@ -263,7 +263,7 @@ describe('Accounts (e2e)', () => {
 
     it('should return 404 for non-existent account', async () => {
       await request(app.getHttpServer())
-        .post('/accounts/9999/statement')
+        .post('/transactions/9999/statement')
         .send({})
         .expect(404);
     });
