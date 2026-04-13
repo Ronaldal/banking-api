@@ -13,9 +13,14 @@ import {
   BalanceResponse,
   BlockResponse,
 } from '../src/interfaces/account.interfaces';
-import { TransactionResponse } from '../src/interfaces/transaction.interfaces';
+import {
+  TransactionResponse,
+  StatementItem,
+} from '../src/interfaces/transaction.interfaces';
 import { getDatabaseConfig } from '../src/config/database.config';
 import { Person } from '../src/entities/person.entity';
+import { Account } from '../src/entities/account.entity';
+import { Transaction } from '../src/entities/transaction.entity';
 
 describe('Accounts (e2e)', () => {
   let app: INestApplication<App>;
@@ -74,6 +79,14 @@ describe('Accounts (e2e)', () => {
       expect(Number(body.balance)).toBe(0);
       expect(body.activeFlag).toBe(true);
       accountId = body.accountId;
+
+      const dbAccount = await dataSource
+        .getRepository(Account)
+        .findOne({ where: { accountId } });
+      expect(dbAccount).not.toBeNull();
+      expect(dbAccount!.personId).toBe(personId);
+      expect(Number(dbAccount!.balance)).toBe(0);
+      expect(dbAccount!.activeFlag).toBe(true);
     });
 
     it('should return 404 for non-existent person', async () => {
@@ -98,6 +111,18 @@ describe('Accounts (e2e)', () => {
       const body = res.body as TransactionResponse;
       expect(Number(body.value)).toBe(500);
       expect(body.accountId).toBe(accountId);
+      expect(body.balance).toBe(500);
+
+      const dbAccount = await dataSource
+        .getRepository(Account)
+        .findOne({ where: { accountId } });
+      expect(Number(dbAccount!.balance)).toBe(500);
+
+      const dbTransaction = await dataSource
+        .getRepository(Transaction)
+        .findOne({ where: { transactionId: body.transactionId } });
+      expect(dbTransaction).not.toBeNull();
+      expect(Number(dbTransaction!.value)).toBe(500);
     });
 
     it('should reject deposit with zero value', async () => {
@@ -143,13 +168,36 @@ describe('Accounts (e2e)', () => {
       const body = res.body as TransactionResponse;
       expect(Number(body.value)).toBe(-200);
       expect(body.accountId).toBe(accountId);
+      expect(body.balance).toBe(300);
+
+      const dbAccount = await dataSource
+        .getRepository(Account)
+        .findOne({ where: { accountId } });
+      expect(Number(dbAccount!.balance)).toBe(300);
+
+      const dbTransaction = await dataSource
+        .getRepository(Transaction)
+        .findOne({ where: { transactionId: body.transactionId } });
+      expect(dbTransaction).not.toBeNull();
+      expect(Number(dbTransaction!.value)).toBe(-200);
     });
 
     it('should reject withdrawal exceeding balance', async () => {
+      const balanceBefore = await dataSource
+        .getRepository(Account)
+        .findOne({ where: { accountId } });
+
       await request(app.getHttpServer())
         .post(`/accounts/${accountId}/withdraw`)
         .send({ value: 99999 })
         .expect(400);
+
+      const balanceAfter = await dataSource
+        .getRepository(Account)
+        .findOne({ where: { accountId } });
+      expect(Number(balanceAfter!.balance)).toBe(
+        Number(balanceBefore!.balance),
+      );
     });
 
     it('should reject withdrawal exceeding daily limit', async () => {
@@ -173,7 +221,7 @@ describe('Accounts (e2e)', () => {
         .get(`/accounts/${accountId}/statement`)
         .expect(200);
 
-      const body = res.body as TransactionResponse[];
+      const body = res.body as StatementItem[];
       expect(body.length).toBe(2); // 1 deposit + 1 withdrawal
     });
 
@@ -185,7 +233,7 @@ describe('Accounts (e2e)', () => {
         )
         .expect(200);
 
-      const body = res.body as TransactionResponse[];
+      const body = res.body as StatementItem[];
       expect(body.length).toBe(2);
     });
 
@@ -198,7 +246,7 @@ describe('Accounts (e2e)', () => {
         )
         .expect(200);
 
-      const body = res.body as TransactionResponse[];
+      const body = res.body as StatementItem[];
       expect(body.length).toBe(0);
     });
 
@@ -217,6 +265,11 @@ describe('Accounts (e2e)', () => {
 
       const body = res.body as BlockResponse;
       expect(body.activeFlag).toBe(false);
+
+      const dbAccount = await dataSource
+        .getRepository(Account)
+        .findOne({ where: { accountId } });
+      expect(dbAccount!.activeFlag).toBe(false);
     });
 
     it('should reject blocking an already blocked account', async () => {

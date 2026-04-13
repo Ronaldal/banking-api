@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug E2E Test",
+      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
+      "args": ["--config", "${workspaceRoot}/test/jest-e2e.json", "${file}"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "disableOptimisticBPs": true,
+      "runtimeArgs": ["--inspect-brk"]
+    }
+  ]
+}

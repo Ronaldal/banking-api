@@ -21,7 +21,11 @@ import {
   BalanceResponse,
   BlockResponse,
 } from '../interfaces/account.interfaces';
-import { TransactionResponse } from '../interfaces/transaction.interfaces';
+import {
+  TransactionResponse,
+  StatementItem,
+} from '../interfaces/transaction.interfaces';
+import { TransactionType } from '../enums/transaction-type.enum';
 
 @ApiTags('Accounts')
 @Controller(ROUTES.ACCOUNTS)
@@ -64,7 +68,11 @@ export class AccountsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: TransactionDto,
   ): Promise<TransactionResponse> {
-    return this.transactionsService.deposit(id, dto);
+    return this.transactionsService.processTransaction(
+      id,
+      dto,
+      TransactionType.DEPOSIT,
+    );
   }
 
   @Post(':id/withdraw')
@@ -88,7 +96,11 @@ export class AccountsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: TransactionDto,
   ): Promise<TransactionResponse> {
-    return this.transactionsService.withdraw(id, dto);
+    return this.transactionsService.processTransaction(
+      id,
+      dto,
+      TransactionType.WITHDRAWAL,
+    );
   }
 
   @Get(':id/balance')
@@ -136,13 +148,13 @@ export class AccountsController {
   @ApiResponse({
     status: 200,
     description: 'Returns filtered transactions.',
-    type: [TransactionResponse],
+    type: [StatementItem],
   })
   @ApiResponse({ status: 404, description: 'Account not found.' })
   async getStatement(
     @Param('id', ParseIntPipe) id: number,
     @Query() filter: GetStatementFilterDto,
-  ): Promise<TransactionResponse[]> {
+  ): Promise<StatementItem[]> {
     return this.transactionsService.getStatement(id, filter);
   }
 }
