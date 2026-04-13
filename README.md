@@ -129,8 +129,6 @@ npm run test:e2e
 # Run tests in watch mode
 npm run test:watch
 
-# Run tests with coverage
-npm run test:cov
 ```
 
 ## Project Structure
