@@ -47,7 +47,7 @@ Open `http://localhost:3050/api` in your browser.
 
 ## Default Seed Data
 
-When the application starts, a default person is automatically seeded (if the table is empty):
+When the application starts, a default person is automatically seeded with onModuleInit in persons.service.ts (if the table is empty):
 
 | Field     | Value       |
 |-----------|-------------|
